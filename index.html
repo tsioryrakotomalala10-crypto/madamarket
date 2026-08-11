@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MadaMarket 🇲🇬</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#111}
+header{background:#111827;color:white;padding:20px 15px}
+h1{margin:0;font-size:25px}
+small{opacity:.7}
+input,select,textarea{width:100%;padding:13px;margin-top:12px;border:1px solid #ddd;border-radius:10px;font-size:15px}
+main{padding:15px;padding-bottom:90px}
+.categories{display:flex;gap:8px;overflow:auto;margin-bottom:15px}
+.categories button{border:0;border-radius:20px;padding:10px 14px;white-space:nowrap}
+.categories button.active{background:#111827;color:white}
+h2{font-size:19px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px #0001}
+.photo{height:120px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:42px}
+.info{padding:10px}
+.title{font-weight:bold;font-size:14px}
+.price{font-weight:bold;margin-top:5px}
+.place{font-size:12px;color:#777;margin-top:4px}
+.fab{position:fixed;right:18px;bottom:65px;border:0;border-radius:30px;padding:14px 18px;background:#111827;color:white;font-weight:bold}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:12px}
+nav button{border:0;background:white}
+.modal{display:none;position:fixed;inset:0;background:#0008;align-items:flex-end}
+.box{background:white;width:100%;padding:20px;border-radius:20px 20px 0 0}
+.publish{width:100%;padding:14px;background:#111827;color:white;border:0;border-radius:10px;margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>MadaMarket 🇲🇬</h1>
+<small>Achète • Vends • Trouve près de chez toi</small>
+<input id="search" placeholder="🔎 Rechercher..." oninput="show()">
+</header>
+
+<main>
+<div class="categories">
+<button class="active" onclick="filter('Tout',this)">Tout</button>
+<button onclick="filter('Téléphones',this)">📱 Téléphones</button>
+<button onclick="filter('Motos',this)">🏍️ Motos</button>
+<button onclick="filter('Vêtements',this)">👕 Vêtements</button>
+<button onclick="filter('Électronique',this)">🎧 Électronique</button>
+</div>
+
+<h2>Annonces récentes</h2>
+<div id="list" class="grid"></div>
+</main>
+
+<button class="fab" onclick="openForm()">＋ Vendre</button>
+
+<nav>
+<button>🏠<br>Accueil</button>
+<button>❤️<br>Favoris</button>
+<button onclick="openForm()">➕<br>Publier</button>
+<button>👤<br>Profil</button>
+</nav>
+
+<div id="modal" class="modal">
+<div class="box">
+<h2>Publier une annonce</h2>
+
+<input id="name" placeholder="Nom de l'article">
+<input id="price" type="number" placeholder="Prix en Ariary">
+
+<select id="cat">
+<option>Téléphones</option>
+<option>Motos</option>
+<option>Vêtements</option>
+<option>Électronique</option>
+<option>Autres</option>
+</select>
+
+<input id="city" placeholder="Ville / quartier">
+<input id="phone" placeholder="Numéro de téléphone">
+<textarea id="desc" placeholder="Description"></textarea>
+
+<button class="publish" onclick="publish()">Publier l'annonce</button>
+<button class="publish" onclick="closeForm()">Annuler</button>
+</div>
+</div>
+
+<script>
+
+let category="Tout";
+
+let products=[
+{name:"iPhone 11 Pro Max",price:1200000,cat:"Téléphones",city:"Antananarivo",icon:"📱"},
+{name:"Casque moto",price:85000,cat:"Motos",city:"Antsirabe",icon:"🏍️"},
+{name:"Sneakers",price:70000,cat:"Vêtements",city:"Toamasina",icon:"👟"},
+{name:"Écouteurs Bluetooth",price:45000,cat:"Électronique",city:"Antananarivo",icon:"🎧"}
+];
+
+function filter(c,b){
+category=c;
+document.querySelectorAll(".categories button").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+show();
+}
+
+function show(){
+let search=document.getElementById("search").value.toLowerCase();
+
+let result=products.filter(p=>
+(category==="Tout"||p.cat===category)&&
+(p.name.toLowerCase().includes(search)||p.city.toLowerCase().includes(search))
+);
+
+document.getElementById("list").innerHTML=result.map(p=>`
+<div class="card">
+<div class="photo">${p.icon}</div>
+<div class="info">
+<div class="title">${p.name}</div>
+<div class="price">${Number(p.price).toLocaleString()} Ar</div>
+<div class="place">📍 ${p.city}</div>
+</div>
+</div>
+`).join("");
+}
+
+function openForm(){
+document.getElementById("modal").style.display="flex";
+}
+
+function closeForm(){
+document.getElementById("modal").style.display="none";
+}
+
+function publish(){
+
+let name=document.getElementById("name").value;
+let price=document.getElementById("price").value;
+let cat=document.getElementById("cat").value;
+let city=document.getElementById("city").value;
+let phone=document.getElementById("phone").value;
+
+if(!name||!price||!city){
+alert("Remplis le nom, le prix et la ville.");
+return;
+}
+
+let icons={
+"Téléphones":"📱",
+"Motos":"🏍️",
+"Vêtements":"👕",
+"Électronique":"🎧",
+"Autres":"📦"
+};
+
+products.unshift({
+name:name,
+price:price,
+cat:cat,
+city:city,
+phone:phone,
+icon:icons[cat]
+});
+
+show();
+closeForm();
+
+alert("Annonce publiée 🎉");
+}
+
+show();
+
+</script>
+</body>
+</html>
